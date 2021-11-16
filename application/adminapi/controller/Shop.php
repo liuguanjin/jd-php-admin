@@ -20,7 +20,7 @@ class Shop extends BaseApi
         if (!empty($params['keyword'])){
             $where['shop_name'] = ['like',"%{$params['keyword']}%"];
         }
-        $shops = \app\adminapi\model\Shop::with('admin')->where($where)->select();
+        $shops = \app\adminapi\model\Shop::with('admin')->where($where)->order('id asc')->paginate(10);
         if (empty($shops)){
             $this->fail('服务器异常,获取店铺列表失败');
         }

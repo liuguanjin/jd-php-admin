@@ -192,33 +192,46 @@ class Goods extends BaseApi
                     unlink('.'.$old_goods_image['pics_sma']);
                 }
             }
-            \app\adminapi\model\GoodsImages::destroy(['goods_id'=>$id]);
             $goods_images = [];
             if (!is_array($params['goods_images'])){
                 $this->fail('商品相册未上传');
             }
             foreach ($params['goods_images'] as $image){
-                if (is_file('.'.$image)){
-                    $pics_big = dirname($image).DS.'thumb_800_'.basename($image);
-                    $pics_sma = dirname($image).DS.'thumb_400_'.basename($image);
-                    $image_obj = \think\Image::open('.'.$image);
-                    $image_obj->thumb(800,800)->save('.'.$pics_big);
-                    $image_obj->thumb(400,400)->save('.'.$pics_sma);
-                    $row = [
-                        'goods_id' => $goods['id'],
-                        'pics_big' => $pics_big,
-                        'pics_sma' => $pics_sma
-                    ];
-                    $goods_images [] = $row;
+                if (empty($image['id'])){
+                    //重新上传的
+                    if (is_file('.'.$image)){
+                        $pics_big = dirname($image).DS.'thumb_800_'.basename($image);
+                        $pics_sma = dirname($image).DS.'thumb_400_'.basename($image);
+                        $image_obj = \think\Image::open('.'.$image);
+                        $image_obj->thumb(800,800)->save('.'.$pics_big);
+                        $image_obj->thumb(400,400)->save('.'.$pics_sma);
+                        $row = [
+                            'goods_id' => $goods['id'],
+                            'pics_big' => $pics_big,
+                            'pics_sma' => $pics_sma
+                        ];
+                        $goods_images [] = $row;
+                    }
+                }else{
+                    unset($image['create_time']);
+                    unset($image['update_time']);
+                    unset($image['delete_time']);
+                    $goods_images[] = $image;
                 }
             }
             $goods_images_model = new \app\adminapi\model\GoodsImages();
             $goods_images_model->allowField(true)->saveAll($goods_images);
-            \app\adminapi\model\SpecGoods::destroy(['goods_id'=>$id]);
             $spec_goods = [];
             foreach ($params['item'] as $v){
-                $v['goods_id'] = $goods['id'];
-                $spec_goods[] = $v;
+                if (empty($v['id'])){
+                    $v['goods_id'] = $goods['id'];
+                    $spec_goods[] = $v;
+                }else{
+                    unset($v['create_time']);
+                    unset($v['update_time']);
+                    unset($v['delete_time']);
+                    $spec_goods[] = $v;
+                }
             }
             $spec_goods_model = new \app\adminapi\model\SpecGoods();
             $spec_goods_model->allowField(true)->saveAll($spec_goods);
@@ -233,7 +246,7 @@ class Goods extends BaseApi
             $this->ok($goods);
         }catch (\Exception $e){
             \think\Db::rollback();
-            $this->fail($e->getLine());
+            $this->fail($e->getMessage());
         }
     }
 

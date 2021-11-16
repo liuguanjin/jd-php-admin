@@ -77,3 +77,17 @@ use \think\Route;
     Route::post('logo','adminapi/upload/logo');
     //多图片上传接口
     Route::post('images','adminapi/upload/images');
+    //管理员获取商品销售排行的接口
+    Route::get('goods-sale-ranking','adminapi/Report/goodsSaleRanking');
+    //管理员获取店铺销售排行的接口
+    Route::get('shops-sale-ranking','adminapi/Report/shopsSaleRanking');
+    //管理员获取销售额排行的接口
+    Route::get('sales-ranking','adminapi/Report/salesRanking');
+    //管理员获取销售订单统计的接口
+    Route::get('sales-order','adminapi/Report/salesOrderStatistics');
+    //管理员更改店铺推荐的接口
+    Route::get('shop-recommend/:id','adminapi/Recommend/shopRecommend');
+    //管理员更改商品推荐的接口
+    Route::get('goods-recommend/:id','adminapi/Recommend/goodsRecommend');
+    //管理员更改品牌推荐的接口
+    Route::get('brand-recommend/:id','adminapi/Recommend/brandRecommend');

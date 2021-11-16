@@ -6,6 +6,7 @@ use think\Controller;
 
 class MyShop extends BaseApi
 {
+    //店铺下售出的宝贝接口
     public function soldGoods()
     {
         $params = input();
@@ -18,9 +19,10 @@ class MyShop extends BaseApi
         if (empty($shop)){
             $this->fail('您暂无店铺！');
         }
-        $goods = \app\homeapi\model\OrderGoods::where($where)->where('shop_id',$shop['id'])->select();
+        $goods = \app\homeapi\model\OrderGoods::where($where)->where('shop_id',$shop['id'])->paginate(10);
         $this->ok($goods);
     }
+    //店铺下所有宝贝接口
     public function myGoods()
     {
         //获取店铺下的商品列表
@@ -41,6 +43,7 @@ class MyShop extends BaseApi
             ->paginate(10);
         $this->ok($list);
     }
+    //店铺下未发货宝贝接口
     public function nosend()
     {
         $params = input();
@@ -59,6 +62,7 @@ class MyShop extends BaseApi
         }
         $this->ok($data);
     }
+    //发货接口
     public function sendgoods($id="")
     {
         $params = input();

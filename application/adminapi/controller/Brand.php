@@ -20,7 +20,7 @@ class Brand extends BaseApi
         if (!empty($params['keyword'])){
             $where['name'] = ['like',"%{$params['keyword']}%"];
         }
-        $list = \app\adminapi\model\Brand::where($where)->paginate(10);
+        $list = \app\adminapi\model\Brand::where($where)->order('id asc')->paginate(10);
         if (empty($list)){
             $this->fail('查询品牌列表失败');
         }
