@@ -58,6 +58,7 @@ class Goods extends BaseApi
             'cate_id|所属分类' => 'require|number',
             'brand_id|所属品牌' => 'require|number',
             'type_id|所属模型' => 'require|number',
+            'shop_id|商铺id' => 'require|number',
             'item|规格商品数组' => 'require|array',
             'goods_images|商品相册' => 'require|array',
             'attr|属性值数组' => 'require|array'
@@ -74,6 +75,7 @@ class Goods extends BaseApi
             }
             $params['goods_attr'] = json_encode($params['attr'],JSON_UNESCAPED_UNICODE);
             $goods = \app\adminapi\model\Goods::create($params,true);
+            \app\adminapi\model\Shop::where('id',$params['shop_id'])->setInc('goods_num',1);
             $goods_images = [];
             foreach ($params['goods_images'] as $image){
                 if (is_file('.'.$image)){

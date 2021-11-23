@@ -11,13 +11,16 @@ class MyShop extends BaseApi
     {
         $params = input();
         $admin_id = $params['admin_id'];
-        $where = [];
-        if (!empty($params['keyword'])){
-            $where['goods_name'] = ['like',"%{$params['keyword']}%"];
+        if (empty($admin_id)){
+            $this->fail('用户信息错误');
         }
         $shop = \app\adminapi\model\Shop::where('admin_id',$admin_id)->find();
         if (empty($shop)){
             $this->fail('您暂无店铺！');
+        }
+        $where = [];
+        if (!empty($params['keyword'])){
+            $where['goods_name'] = ['like',"%{$params['keyword']}%"];
         }
         $goods = \app\homeapi\model\OrderGoods::where($where)->where('shop_id',$shop['id'])->paginate(10);
         $this->ok($goods);
@@ -96,7 +99,62 @@ class MyShop extends BaseApi
     }
     public function myEvaluate()
     {
-        $current_time = time();
-        dump($current_time);
+        $params = input();
+        $where = [];
+        if (!empty($params['keyword'])){
+            $where['content|nickname'] = ['like',"%{$params['keyword']}%"];
+        }
+        $admin_id = $params['admin_id'];
+        if (empty($admin_id)){
+            $this->fail('用户信息错误');
+        }else{
+            $shop = \app\adminapi\model\Shop::where('admin_id',$admin_id)->find();
+            if (empty($shop)){
+                $this->fail('您暂无店铺！');
+            }
+            $evaluate = \app\adminapi\model\Evaluate::alias('t1')
+                ->join('jd_user t2','t1.user_id=t2.id','left')
+                ->join('jd_goods t3','t1.goods_id=t3.id','left')
+                ->join('jd_shop t4','t1.shop_id=t4.id','left')
+                ->field('t1.*,t2.nickname,t3.goods_name,t4.shop_name')
+                ->where('t1.shop_id',$shop['id'])
+                ->where($where)
+                ->paginate(10);
+            $this->ok($evaluate);
+        }
+    }
+    //修改一条评论中的商家回复内容
+    public function shopEvaluate($id="")
+    {
+        $params = input();
+        if (empty($id)){
+            $this->fail('获取评论信息失败');
+        }else{
+            $evaluate = \app\adminapi\model\Evaluate::find($id);
+            if (empty($evaluate)){
+                $this->fail('获取评论信息失败');
+            }else{
+                try {
+                    \app\adminapi\model\Evaluate::where('id',$id)->setField('shop_evaluate_content',$params['shop_evaluate_content']);
+                    $this->ok();
+                }catch (\Exception $e){
+                    $this->fail($e->getMessage());
+                }
+            }
+        }
+    }
+    //获取一条评论中的商家回复内容
+    public function getShopEvaluate($id="")
+    {
+        if (empty($id)){
+            $this->fail('获取评论信息失败');
+        }else{
+            $evaluate = \app\adminapi\model\Evaluate::find($id);
+            if (empty($evaluate)){
+                $this->fail('获取评论信息失败');
+            }else{
+                $this->ok($evaluate['shop_evaluate_content']);
+            }
+        }
     }
 }
